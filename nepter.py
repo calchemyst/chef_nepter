@@ -45,10 +45,10 @@ def get_recipes(conn, ingredients):
     :return:
     """
     cur = conn.cursor()
-    sql = "SELECT r.name, r.location, p.perishability from ingredients_to_recipes ir " \
-          "left join perishability p on p.ingredient = ir.ingredient_id " \
-          "left join recipes r on r.id = ir.recipe_id where ingredient_id in " \
-          "(SELECT id FROM ingredients where name in ({seq}))".format(seq=','.join(['?']*len(ingredients)))
+    sql = """SELECT r.name, r.location, p.perishability from ingredients_to_recipes ir
+          left join perishability p on p.ingredient = ir.ingredient_id
+          left join recipes r on r.id = ir.recipe_id where ingredient_id in
+          (SELECT id FROM ingredients where name in ({seq}))""".format(seq=','.join(['?']*len(ingredients)))
     cur.execute(sql, ingredients)
     return cur.fetchall()
 
