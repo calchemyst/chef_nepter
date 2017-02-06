@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chef Nepter Suggests</title>
+  </head>
+  <body>
+    <div class="container">
+      <table>
+        <tr><td>Recipe Name</td><td>Eco Score (lower means use sooner)</td></tr>
+        {% for  name, location, score in recipes %}
+        <tr><td><a href={{ location }}> {{ name }} </a></td> <td> {{ score }}</td></tr>
+        {% endfor %}
+        </table>
+    </div>
+  </body>
+</html>
