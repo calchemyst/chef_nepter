@@ -33,7 +33,6 @@ def handle_recipes():
     for ingredient in request.form:
         if ingredient != 'recipes':
             ingredients.append(ingredient)
-    print(ingredients)
     relevant_recipes = get_recipes(conn, ingredients)
     return render_template('recipes.html', recipes=relevant_recipes)
 
@@ -45,12 +44,15 @@ def get_recipes(conn, ingredients):
     :return:
     """
     cur = conn.cursor()
-    sql = """SELECT r.name, r.location, p.perishability from ingredients_to_recipes ir
-          left join perishability p on p.ingredient = ir.ingredient_id
-          left join recipes r on r.id = ir.recipe_id where ingredient_id in
-          (SELECT id FROM ingredients where name in ({seq}))""".format(seq=','.join(['?']*len(ingredients)))
+    sql = """SELECT r.name, r.location, p.perishability, i.name from ingredients_to_recipes ir
+          inner join perishability p on p.ingredient = ir.ingredient_id
+          inner join recipes r on r.id = ir.recipe_id
+          inner join ingredients i on i.id = ir.ingredient_id
+          where ir.ingredient_id in
+            (SELECT id FROM ingredients where name in ({seq}))""".format(seq=','.join(['?']*len(ingredients)))
     cur.execute(sql, ingredients)
-    return cur.fetchall()
+    results = cur.fetchall()
+    return results
 
 
 def get_ingredients(conn):
@@ -61,6 +63,20 @@ def get_ingredients(conn):
     """
     cur = conn.cursor()
     cur.execute("SELECT name FROM ingredients")
+    ingredients = cur.fetchall()
+    ingredients.sort()
+    return ingredients
+
+
+def get_ingredient_names(conn, ingredient_ids):
+    """
+    Query all rows in the tasks table
+    :param conn: the Connection object
+    :return:
+    """
+    cur = conn.cursor()
+    sql = """SELECT name FROM ingredients where id in ({seq})""".format(seq=','.join(['?']*len(ingredient_ids)))
+    cur.execute(sql, ingredient_ids)
     ingredients = cur.fetchall()
     ingredients.sort()
     return ingredients
